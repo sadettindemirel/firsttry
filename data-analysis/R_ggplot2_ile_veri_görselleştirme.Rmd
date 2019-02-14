@@ -1,0 +1,165 @@
+---
+title: "R Ekosisteminde ggplot2 ile veri nasıl görselleştirilir?"
+output: html_notebook
+autor: Sadettin Demirel
+---
+
+###1) Paketlerin yüklenmesi ve verinin hazırlanması
+
+```{r}
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("gapminder")
+
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(gapminder)
+```
+
+Verinin içeri aktarıldığından emin olalım
+```{r}
+View(gapminder)
+```
+
+Veri setindeki değişkenleri türkçeleştirelim
+
+```{r}
+tr_isim <- c("ülke","kıta","yıl","yaşam_süresi","nüfus","kişi_başı_milli_gelir")
+colnames(gapminder) <- tr_isim
+View(gapminder)
+```
+
+###3)Temel Grafikler
+
+####a) Çubuk ve sütun grafikler
+Kıtalardaki yaşam süresi 1952'den 2007 yılları arasında nasıl değişmiş bakalım
+```{r}
+ggplot(gapminder, aes(yıl, yaşam_süresi, fill = kıta))+geom_col()
+```
+
+Anlamlı bir grafik oluşturabilmemiz için yığılı sutun grafik yerine çoklu çubuk grafik oluşturmalıyız
+
+```{r}
+ggplot(gapminder, aes(yıl, yaşam_süresi, fill = kıta))+geom_col(position = "dodge")
+```
+
+#### b)dağılım grafiği
+
+Önce veriyi filtreleyelim
+
+```{r}
+gapminder_2007<- filter(gapminder,yıl == 2007)
+```
+
+Ve görselleştirelim
+
+```{r}
+ggplot(gapminder_2007, aes(yaşam_süresi,kişi_başı_milli_gelir, color = kıta))+geom_point()
+```
+
+Estetik bir görsel oluşturmak için veri noktalarını büyütelim
+
+```{r}
+ggplot(gapminder_2007, aes(yaşam_süresi,kişi_başı_milli_gelir, color = kıta)) +geom_point(size = 4, alpha = 0.7)
+```
+
+
+Grafiğe başlık ekleyelim ve eksen isimlerini düzenleyelim
+
+```{r}
+ggplot(gapminder_2007, aes(yaşam_süresi,kişi_başı_milli_gelir, color = kıta)) +geom_point(size = 4, alpha = 0.7)+
+       labs(x="yaşam süresi",
+       y ="kişi başına düşen milli gelir",
+       title = "5 Kıtada Yaşam Süresi ve Kişi Başına Düşen Milli Gelir İlişkisi",
+       subtitle = "Veri Kaynağı: Gapminder, 2007", 
+       caption = "@demirelsadettin")
+```
+ 
+
+###4) Renk seçimi
+
+```{r}
+renk <- c("#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00")
+ggplot(gapminder_2007, aes(yaşam_süresi,kişi_başı_milli_gelir, color = kıta)) +geom_point(size = 4, alpha = 0.7)+
+       labs(x="yaşam süresi",
+       y ="kişi başına düşen milli gelir",
+       title = "5 Kıtada Yaşam Süresi ve Kişi Başına Düşen Milli Gelir İlişkisi",
+       subtitle = "Veri Kaynağı: Gapminder, 2007", 
+       caption = "@demirelsadettin")+
+  scale_color_manual(values = renk)
+```
+
+###5) Facets
+
+#### Çubuk Grafik
+
+```{r}
+ggplot(gapminder, aes(yıl, yaşam_süresi, fill = kıta))+
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = renk)+
+  labs(x ="yıl",y="yaşam süresi",
+       title ="Son 50 yılda 5 kıtada yaşam süresinin değişimi", 
+       subtitle = "Gapminder, 1952 -2007", 
+       caption = "@demirelsadettin")+
+  facet_wrap(~kıta, ncol =5)
+```
+
+#### Dağılım Grafiği
+
+```{r}
+ggplot(gapminder, aes(yaşam_süresi,kişi_başı_milli_gelir, color = kıta))+
+  geom_point(size = 4, alpha = 0.7) +
+  labs(x="yaşam süresi",
+       y ="kişi başına düşen milli gelir",
+       title = "5 Kıtada Yaşam Süresi ve Kişi Başına Düşen Milli Gelir İlişkisi",
+       subtitle = "Veri Kaynağı: Gapminder, 1952-2007", 
+       caption = "@demirelsadettin")+
+  scale_color_manual(values = renk)+
+  facet_wrap(~yıl, ncol = 6)
+```
+
+
+###6) Grafik Temasını düzenleyelim
+
+####theme_minimal() temasını kullanalım
+
+```{r}
+dagılım_grafigi <- ggplot(gapminder_2007, aes(yaşam_süresi,kişi_başı_milli_gelir, color = kıta))+
+  geom_point(size = 4, alpha = 0.7) +
+  labs(x="yaşam süresi",
+       y ="kişi başına düşen milli gelir",
+       title = "5 Kıtada Yaşam Süresi ile Kişi Başına Düşen Milli Gelir İlişkisi",
+       subtitle = "Veri Kaynağı: Gapminder, 2007", 
+       caption = "@demirelsadettin")+
+  scale_color_manual(values = renk)
+```
+
+```{r}
+dagılım_grafigi + theme_minimal()+theme(legend.position = "bottom")
+```
+
+#### Özel Tema
+
+```{r}
+theme_custom <- function() {
+  theme_minimal() +
+    theme(
+      text = element_text(family = "Roboto", color = "gray25"),
+      plot.title = element_text(face = "bold"),
+      plot.subtitle = element_text(size = 11),
+      plot.caption = element_text(color = "gray30"),
+      plot.background = element_rect(fill = "gray95"),
+      legend.position = "bottom",
+      legend.title = element_blank()
+    )
+}
+```
+
+```{r}
+dagılım_grafigi+theme_custom()
+```
+
+**Not** *Çalışmanın tekrarlanabilirliğini etkilediği için çizgi grafik kod dosyasından çıkartılmıştır*
+
+###by [Sadettin Demirel](https://twitter.com/demirelsadettin)

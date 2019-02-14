@@ -1,0 +1,94 @@
+---
+title: "R Dplyr Paketi ile Veri Nasıl İşlenir ve Analiz Edilir?"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+#### 1) Gerekli paketleirn yüklenmesi
+```{r eval=FALSE}
+install.packages("dplyr")
+install.packages("tidyverse")
+library(dplyr)
+library(tidyverse)
+```
+
+#### 2) Veri setini içeri aktarma
+Veri setini bu [linkten](https://drive.google.com/file/d/1xhCT8zWvwien-FfcVnIB-9zAsUynm6eI/view?usp=sharing) indir
+
+#### 3) Veri setini Rstudio kullanarak içeri aktar
+Bu [linkteki](https://gfycat.com/gifs/detail/PleasantGoodnaturedAmericanredsquirrel) giften nasıl içeri aktarılacağına göz atabilirsin
+
+#### 4) Prarik 1,2,3,4'ü gerçekleştir
+##### Pratik 1: veri setindeki belirli değişkenleri seçme
+```{r eval=FALSE}
+yeni_cbs_tweets <- select(cbs_tweets, aday, tarih, cihaz, begenme, retweet, takipci_sayısı)
+View(cbs_tweets)
+```
+
+
+##### Pratik 2: CB adaylarının tweetlerinin etkilesimlerini hesaplama
+```{r eval=FALSE}
+yeni_cbs_tweets <- mutate(yeni_cbs_tweets, etkilesim_degeri = (begenme+retweet/2)/takipci_sayısı)
+View(cbs_tweets)
+```
+
+##### pratik 3: Sadece Akşener, Demirtaş, Erdoğan ve İnce’nin tweetleri kalacak şekilde veri kümesini filtrele
+```{r eval=FALSE}
+yeni_cbs_tweets <- filter(yeni_cbs_tweets, aday %in% c("aksener", "demirtas", "erdogan","ince"))
+View(yeni_cbs_tweets)
+```
+
+##### pratik 4: CB adaylarının isimlerini alfabetik olarak sıralama
+```{r eval=FALSE}
+yeni_cbs_tweets <- arrange(yeni_cbs_tweets, aday)
+View(cbs_tweets)
+```
+
+
+##### Aynı işlemi bağlatı operatörü (%>%) ile yapma
+```{r eval=FALSE}
+yeni_tweet_verisi2 <- cbs_tweets %>% 
+  select(aday, tarih, cihaz, begenme, retweet, takipci_sayısı) %>% 
+  mutate(etkilesim_degeri =(begenme+retweet/2)/takipci_sayısı) %>% 
+  filter(aday %in% c("aksener", "demirtas", "erdogan","ince")) %>% 
+  arrange(aday)
+```
+
+#### 5) Manipüle ettiğimiz verileri görselleştirelim
+
+##### 5.1 veri görselleştirme: CB Adaylarının Begeni & Retweet İstatistikleri
+```{r eval = FALSE}
+ggplot(yeni_cbs_tweets,aes(begenme, retweet, color = aday))+
+  geom_point(size= 3, alpha =0.5)+
+  scale_color_manual(values = color1)+
+  labs(x="begeni sayısı",y="retweet", 
+       title ="CB Adaylarının Begeni & Retweet İstatistikleri",
+       subtitle ="Analiz 1 Mayıs -22 Haziran 2018 arasındaki tweetleri kapsar",
+       caption = "@demirelsadettin")+ theme_minimal(legend.position = "bottom")
+```
+
+##### 5.2) Aynı analizi adaylara ayrı ayrı bölerek yapalım.
+```{r eval = FALSE}
+ggplot(yeni_cbs_tweets,aes(begenme, retweet, color = aday))+
+  geom_point(size= 3, alpha =0.5)+
+  scale_color_manual(values = color1)+facet_wrap(~aday)
+  labs(x="begeni sayısı",y="retweet", 
+       title ="CB Adaylarının Begeni & Retweet İstatistikleri",
+       subtitle ="Analiz 1 Mayıs -22 Haziran 2018 arasındaki tweetleri kapsar",
+       caption = "@demirelsadettin")+ theme_minimal(legend.position = "bottom")
+```
+
+##### 5.3) veri görselleştirme 2: CB Adaylarının Twitter Etkilesimleri
+```{r eval=FALSE}
+ggplot(yeni_cbs_tweets,aes(tarih, etkilesim_degeri, color = aday))+
+  geom_line(size= 0.9)+ facet_wrap(~aday)+ 
+  scale_color_manual(values = color1)+
+  labs(x="",y="tweet başına etkileşim oranı", 
+       title ="CB Adaylarının Twitter Etkileşimleri (1 Mayıs - 22 Haziran)",
+       subtitle = "Analiz 1 Mayıs ve 22 Haziran arasındaki tweetleri kapsar",
+       caption = "@demirelsadettin") +theme_minimal(legend.position = "bottom")
+```
+
+By [SadettinDemirel](https://twitter.com/demirelsadettin)
