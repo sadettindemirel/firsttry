@@ -162,4 +162,4 @@ dagılım_grafigi+theme_custom()
 
 **Not** *Çalışmanın tekrarlanabilirliğini etkilediği için çizgi grafik kod dosyasından çıkartılmıştır*
 
-###by [Sadettin Demirel](https://twitter.com/demirelsadettin)
+###by [Sadettin Demirel, - Github için güncellendi](https://twitter.com/demirelsadettin)
